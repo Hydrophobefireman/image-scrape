@@ -93,7 +93,14 @@ def fetch(url, directory):
     if os.path.isfile(os.path.join("downloaded-images", directory, filename)):
         filename = filename + str(int(time.time()))
     a = sess.get(url, stream=True, headers=basic_headers, allow_redirects=True)
-    with open(os.path.join("downloaded-images", directory, filename), "wb") as f:
+    mime = a.headers.get("Content-Type", "").split("/")[1]
+    if "jpg" or "jpeg" in mime:
+        mime = "jpg"
+    elif "png" in mime:
+        mime = "png"
+    with open(
+        os.path.join("downloaded-images", directory, filename + "." + mime), "wb"
+    ) as f:
         for chunk in a.iter_content(chunk_size=4096):
             if chunk:
                 f.write(chunk)
