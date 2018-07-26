@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup as bs
 import html
 
 BASEURL_GOOGLE = "https://www.google.com/search?q={query}&tbm=isch"
-BASEURL_BING = "https://www.bing.com/images/search?q={query}"
+BASEURL_BING = "https://bing.com/images/search?q={query}"
 basic_headers = {
     "Accept-Encoding": "gzip,deflate",
     "User-Agent": "Mozilla/5.0 (Windows; U; Windows NT 10.0; en-US) AppleWebKit/604.1.38 (KHTML, like Gecko) Chrome/68.0.3325.162",
@@ -17,24 +17,26 @@ basic_headers = {
     "dnt": "1",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
 }
+sess = requests.Session()
 
 
 def get_data_bing(url, adl=False):
-    bing_base_adlt_url = "https://www.bing.com/settings.aspx?pref_sbmt=1&adlt_set=off&adlt_confirm=1&is_child=0&"
+    bing_base_adlt_url = "https://bing.com/settings.aspx?pref_sbmt=1&adlt_set=off&adlt_confirm=1&is_child=0&"
     print("[Bing]Fetching:", url)
-    page = requests.get(url, headers=basic_headers, allow_redirects=True)
+    page = sess.get(url, headers=basic_headers, allow_redirects=True)
     cookies = dict(page.cookies)
     data = []
     soup = bs(page.text, "html.parser")
     if adl:
         _ru = soup.find(attrs={"id": "ru"})
         _guid = soup.find(attrs={"id": "GUID"})
+        print(page.url)
         if _ru is None or _guid is None:
             raise Exception("Could Not verify age")
         ru = _ru.attrs.get("value")
         guid = _guid.attrs.get("value")
         new_url = bing_base_adlt_url + urlencode({"ru": ru, "GUID": guid})
-        req = requests.get(
+        req = sess.get(
             new_url, headers=basic_headers, cookies=cookies, allow_redirects=True
         )
         if "/images/" not in req.url:
@@ -61,7 +63,7 @@ def get_data_bing(url, adl=False):
 def get_data_google(url):
     data = []
     print("[Google]Fetching URL")
-    page = requests.get(url, headers=basic_headers, allow_redirects=True)
+    page = sess.get(url, headers=basic_headers, allow_redirects=True)
     page.raise_for_status
     soup = bs(page.text, "html.parser")
     divs = soup.find_all("div", attrs={"class": "rg_meta notranslate"})
@@ -90,7 +92,7 @@ def fetch(url, directory):
         os.mkdir(os.path.join("downloaded-images", directory))
     if os.path.isfile(os.path.join("downloaded-images", directory, filename)):
         filename = filename + str(int(time.time()))
-    a = requests.get(url, stream=True, headers=basic_headers)
+    a = sess.get(url, stream=True, headers=basic_headers, allow_redirects=True)
     with open(os.path.join("downloaded-images", directory, filename), "wb") as f:
         for chunk in a.iter_content(chunk_size=4096):
             if chunk:
