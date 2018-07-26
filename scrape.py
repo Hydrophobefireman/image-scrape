@@ -22,7 +22,7 @@ basic_headers = {
 def get_data_bing(url, adl=False):
     bing_base_adlt_url = "https://www.bing.com/settings.aspx?pref_sbmt=1&adlt_set=off&adlt_confirm=1&is_child=0&"
     print("[Bing]Fetching:", url)
-    page = requests.get(url, headers=basic_headers)
+    page = requests.get(url, headers=basic_headers, allow_redirects=True)
     cookies = dict(page.cookies)
     data = []
     soup = bs(page.text, "html.parser")
@@ -34,7 +34,9 @@ def get_data_bing(url, adl=False):
         ru = _ru.attrs.get("value")
         guid = _guid.attrs.get("value")
         new_url = bing_base_adlt_url + urlencode({"ru": ru, "GUID": guid})
-        req = requests.get(new_url, headers=basic_headers, cookies=cookies)
+        req = requests.get(
+            new_url, headers=basic_headers, cookies=cookies, allow_redirects=True
+        )
         if "/images/" not in req.url:
             raise Exception("Could not Find Images")
         soup = bs(req.text, "html.parser")
