@@ -25,9 +25,7 @@ directory = "images"
 
 def fetch(u):
     og, fb = u["og"], u["fb"]
-
     sess = requests.Session()
-    print("URL:", og)
     filename = secrets.token_urlsafe(10)
     if not os.path.isdir(directory):
         os.mkdir(directory)
@@ -51,8 +49,7 @@ def fetch(u):
 
 
 def slideshow(loc):
-    os.chdir(loc)
-    os.system("""cat *| ffmpeg -r 1/3 -c:v libx264 -r 30 -pix_fmt yuv420p output.mkv""")
+    print("""cat *| ffmpeg -r 1/3 -c:v libx264 -r 30 -pix_fmt yuv420p output.mkv""")
 
 
 def get(term):
