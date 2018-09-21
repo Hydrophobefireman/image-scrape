@@ -18,6 +18,8 @@ basic_headers = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
 }
 sess = requests.Session()
+with open(".mimetypes") as f:
+    __mimes__ = json.loads(f.read())
 
 
 def get_data_bing(url, adl=False):
@@ -93,14 +95,8 @@ def fetch(url, directory):
     if os.path.isfile(os.path.join("downloaded-images", directory, filename)):
         filename = filename + str(int(time.time()))
     a = sess.get(url, stream=True, headers=basic_headers, allow_redirects=True)
-    mime = a.headers.get("Content-Type", "").split("/")[1]
-    if "jpg" or "jpeg" in mime:
-        mime = "jpg"
-    elif "png" in mime:
-        mime = "png"
-    with open(
-        os.path.join("downloaded-images", directory, filename + "." + mime), "wb"
-    ) as f:
+    mime = __mimes__.get(a.headers.get("Content-Type", ""), "bin")
+    with open(os.path.join("downloaded-images", directory, filename + mime), "wb") as f:
         for chunk in a.iter_content(chunk_size=4096):
             if chunk:
                 f.write(chunk)
@@ -109,11 +105,6 @@ def fetch(url, directory):
 
 if __name__ == "__main__":
     query = input("Enter Query:")
-    safe = input("Remove safe(Bing)?(y/n):").lower()
-    if safe == "y":
-        adl = True
-    else:
-        print("safe set to false")
-        adl = False
+    adl = not 0
     get_data_bing(BASEURL_BING.format(query=query), adl=adl)
     get_data_google(BASEURL_GOOGLE.format(query=query))
