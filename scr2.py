@@ -31,7 +31,7 @@ def fetch(u):
     filename = secrets.token_urlsafe(10)
     if not os.path.isdir(directory):
         os.mkdir(directory)
-    if os.path.isfile(os.path.join("downloaded-images", directory, filename)):
+    if os.path.isfile(os.path.join(directory, filename)):
         filename = filename + secrets.token_urlsafe(5)
     try:
         a = sess.get(og, stream=True, headers=basic_headers, allow_redirects=True)
@@ -43,9 +43,7 @@ def fetch(u):
     if not mime or mime == ".webp":
         print("BAD IMAGE")
         return
-    with open(
-        os.path.join("downloaded-images", directory, f"img{filename}" + mime), "wb"
-    ) as f:
+    with open(os.path.join(directory, f"img{filename}" + mime), "wb") as f:
         for chunk in a.iter_content(chunk_size=4096):
             if chunk:
                 f.write(chunk)
