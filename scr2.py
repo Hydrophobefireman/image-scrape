@@ -49,7 +49,7 @@ def fetch(u):
 
 
 def slideshow(loc):
-    print("cat * | ffmpeg -r 1/3 -f image2pipe -i - output.mkv")
+    print("\n\ncat * | ffmpeg -r 1/3 -f image2pipe -i - output.mkv")
 
 
 def get(term):
