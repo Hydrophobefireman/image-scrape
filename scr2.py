@@ -10,13 +10,13 @@ from bs4 import BeautifulSoup as bs
 
 basic_headers = {
     "Accept-Encoding": "gzip,deflate",
-    "User-Agent": "Mozilla/5.0 (Windows; U; Windows NT 10.0; en-US) AppleWebKit/604.1.38 (KHTML, like Gecko) Chrome/68.0.3325.162",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3163.100 Safari/537.36",
     "Upgrade-Insecure-Requests": "1",
     "dnt": "1",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
 }
 with open(".mimetypes") as f:
-    __mimes__ = json.loads(f.read())
+    __mimes__ = json.load(f)
 
 if not os.path.isdir("images"):
     os.mkdir("images")
@@ -57,10 +57,14 @@ def get(term):
     print("URL:", url)
     soup = bs(requests.get(url, headers={"SearchPy-Custom": "1"}).text, "html5lib")
     imgs = []
-    for x in soup.find_all("img"):
-        imgs.append(
-            {"og": x.attrs.get("data-original"), "fb": x.attrs.get("data-fallback")}
-        )
+    arr = []
+    bing_data = json.loads(soup.find("div", {"id": "bing-data"}).text)
+    google_data = json.loads(soup.find("div", {"id": "google-data"}).text)
+    arr.extend(bing_data)
+    arr.extend(google_data)
+    for i in arr:
+        imgs.append({"og": i.get("img"), "fb": i.get("fallback")})
+    print(imgs)
     print("Number Of URLS:", len(imgs))
     thread = [threading.Thread(target=fetch, args=(url,)) for url in imgs]
     for t in thread:
