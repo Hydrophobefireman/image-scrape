@@ -58,8 +58,9 @@ def get(term):
     soup = bs(requests.get(url, headers={"SearchPy-Custom": "1"}).text, "html5lib")
     imgs = []
     arr = []
-    bing_data = json.loads(soup.find("div", {"id": "bing-data"}).text)
-    google_data = json.loads(soup.find("div", {"id": "google-data"}).text)
+    body_attrs = soup.find("body").attrs
+    bing_data = json.loads(body_attrs.get("data-bing"))
+    google_data = json.loads(body_attrs.get("data-google"))
     arr.extend(bing_data)
     arr.extend(google_data)
     for i in arr:
